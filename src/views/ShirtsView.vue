@@ -1,8 +1,8 @@
 <template>
   <div style="text-align: center;">
     <h1>Liste des tee-shirts</h1>
+    <a v-if="hide_back_btn" :href="new_page_prec">Aller à la page précédente</a><br />
     <a v-if="!liste_produits_count" :href="new_page">Aller à la page suivante</a>
-    <a v-else :href="new_page">Aller à la page précédente</a>
   </div>
   <div v-if="!liste_produits_count" style="margin-top: 2em; display: grid;grid-template-columns: repeat(3, 1fr);">
     <div v-for="produit in liste_produits" style="background-color: white; padding: 30px; width: 269px; border-radius: 10px; margin-top: 10px;">
@@ -30,10 +30,16 @@ import ax from 'axios'
 export default {
     data() {
         var new_page = parseInt(this.$route.params.page) + 1;
+        if (new_page == 1) {
+          var hide_back_btn = false;
+        }else{
+          var hide_back_btn = true;
+        }
         return {
           liste_produits: null,
           liste_produits_count: false,
-          new_page: new_page
+          new_page: new_page,
+          hide_back_btn: hide_back_btn
         }
     },
     mounted() {
@@ -41,11 +47,13 @@ export default {
       ax
         .get('http://vps-a47222b1.vps.ovh.net/TShirt/page/' + this.new_page)
         .then(function (response) {
-          console.log(response);
           self.liste_produits = response.data
           if (self.liste_produits.length == 0) {
+            self.hide_back_btn = true;
             self.liste_produits_count = true;
-            self.new_page = self.new_page - 2;
+            self.new_page_prec = self.new_page - 2;
+          }else{
+            self.new_page_prec = self.new_page - 2;
           }
         })
     }
